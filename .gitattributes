@@ -1,0 +1,36 @@
+# Normalize line endings across platforms.
+#
+# Without this, Windows clones (Git default core.autocrlf=true) check shell
+# scripts out with CRLF. Inside the Linux container the kernel then reads the
+# shebang as "#!/bin/sh\r" and looks for an interpreter literally named
+# "/bin/sh\r", which does not exist — Docker reports:
+#   exec /usr/local/bin/entrypoint.sh: no such file or directory
+#
+# Force LF on everything that runs inside the container or is parsed by a
+# POSIX tool, on every platform, no matter the user's git settings.
+
+# Default: let git decide text vs binary, normalize text to LF in the repo.
+* text=auto eol=lf
+
+# Files that MUST be LF (executed/parsed in Linux). Explicit so intent is clear.
+*.sh        text eol=lf
+*.bash      text eol=lf
+docker/entrypoint.sh text eol=lf
+Dockerfile  text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+
+# Windows-only scripts keep CRLF.
+*.ps1       text eol=crlf
+*.cmd       text eol=crlf
+*.bat       text eol=crlf
+
+# Binaries: never touch.
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+*.gif       binary
+*.ico       binary
+*.woff      binary
+*.woff2     binary
+*.pdf       binary

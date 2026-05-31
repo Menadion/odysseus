@@ -81,6 +81,20 @@ MemoryVectorStore initialized
 The Cookbook model catalog check should print a non-zero count. If it prints
 `0`, rebuild the Odysseus image with `docker compose build --no-cache odysseus`.
 
+**Windows: `entrypoint.sh: no such file or directory`** — if the `odysseus`
+container restart-loops with
+`exec /usr/local/bin/entrypoint.sh: no such file or directory`, the shell
+script was checked out with Windows CRLF line endings, so the container's
+shebang becomes `#!/bin/sh\r`. The repo's `.gitattributes` and a Dockerfile
+`sed` step now prevent this. If you cloned before that fix, re-normalize and
+rebuild:
+```powershell
+git rm --cached -r .
+git reset --hard
+docker compose build --no-cache odysseus
+docker compose up -d
+```
+
 ### Option 2: Manual install — Linux / macOS
 **Requirements:** Python 3.11+. On Linux/Termux, Cookbook also requires `tmux`
 for background model downloads and serves.

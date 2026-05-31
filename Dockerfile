@@ -39,7 +39,13 @@ RUN mkdir -p data logs
 # update them) silently fails on EPERM, breaking skill extraction,
 # prefs persistence, mail attachments, etc.
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+# Strip any CRLF line endings before making it executable. .gitattributes
+# already forces LF in the repo, but a stray Windows checkout (or an editor
+# that rewrote the file) would otherwise turn the shebang into "#!/bin/sh\r"
+# and the kernel would fail with "no such file or directory". sed -i makes
+# the image robust regardless of how the build context was checked out.
+RUN sed -i 's/\r$//' /usr/local/bin/entrypoint.sh \
+    && chmod +x /usr/local/bin/entrypoint.sh
 
 EXPOSE 7000
 
